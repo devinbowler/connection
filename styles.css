@@ -157,7 +157,7 @@ h1 {
 /* Toast */
 #toast {
   position: fixed;
-  top: -4rem;
+  top: 2rem;
   left: 50%;
   transform: translateX(-50%);
   background: #1c1917;
@@ -167,12 +167,12 @@ h1 {
   font-weight: 600;
   font-size: 0.9rem;
   z-index: 1000;
-  transition: top 0.3s ease;
   white-space: nowrap;
+  display: none;
 }
 
 #toast.show {
-  top: 2rem;
+  display: block;
 }
 
 /* Final reveal */
