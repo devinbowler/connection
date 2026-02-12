@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Connections - Valentine's Edition</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<h1>Connections</h1>
+<p class="subtitle">Valentine's Edition</p>
+
+<div id="game-container">
+  <div id="solved-area"></div>
+  <div id="card-grid"></div>
+  <div id="controls">
+    <button class="btn btn-shuffle" onclick="shuffleCards()">Shuffle</button>
+    <button class="btn btn-deselect" onclick="deselectAll()">Deselect All</button>
+    <button class="btn btn-submit" id="submit-btn" disabled onclick="submitGuess()">Submit</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<!-- Final "Will you be my valentine?" reveal -->
+<div id="reveal-overlay">
+  <div id="reveal-text"></div>
+  <div id="response-buttons">
+    <button class="btn-yes" onclick="sayYes()">Yes</button>
+    <button class="btn-no" id="no-btn">No</button>
+  </div>
+</div>
+
+<!-- YIPPIE screen -->
+<div id="yippie-overlay">
+  <div id="yippie-text">YIPPIEEEEEEE</div>
+</div>
+
+<script>
+  // ============ GAME DATA ============
+  const groups = [
+    {
+      title: "WILL",
+      subtitle: "Words meaning determination",
+      words: ["RESOLVE", "DRIVE", "SPIRIT", "GRIT"],
+      color: "purple"
+    },
+    {
+      title: "YOU",
+      subtitle: "Second-person pronouns",
+      words: ["THOU", "YE", "U", "YOURSELF"],
+      color: "blue"
+    },
+    {
+      title: "BE MY",
+      subtitle: "Words that imply possession / belonging",
+      words: ["MINE", "OWN", "BELONG", "CLAIM"],
+      color: "green"
+    },
+    {
+      title: "VALENTINE",
+      subtitle: "Valentine's Day imagery",
+      words: ["ROSE", "CUPID", "HEART", "CHOCOLATE"],
+      color: "yellow"
+    }
+  ];
+
+  // Build a lookup: word -> group index
+  const wordToGroup = {};
+  groups.forEach((g, i) => g.words.forEach(w => wordToGroup[w] = i));
+
+  // All words, shuffled
+  let remainingWords = groups.flatMap(g => [...g.words]);
+  shuffle(remainingWords);
+
+  let selected = new Set();
+  let solvedGroups = [];
+
+  // ============ RENDER ============
+  function render() {
+    const grid = document.getElementById("card-grid");
+    grid.innerHTML = "";
+    remainingWords.forEach(word => {
+      const card = document.createElement("div");
+      card.className = "card" + (selected.has(word) ? " selected" : "");
+      card.textContent = word;
+      card.addEventListener("click", () => toggleCard(word));
+      grid.appendChild(card);
+    });
+    document.getElementById("submit-btn").disabled = selected.size !== 4;
+  }
+
+  function toggleCard(word) {
+    if (selected.has(word)) {
+      selected.delete(word);
+    } else {
+      if (selected.size >= 4) return;
+      selected.add(word);
+    }
+    render();
+  }
+
+  function deselectAll() {
+    selected.clear();
+    render();
+  }
+
+  function shuffleCards() {
+    shuffle(remainingWords);
+    render();
+  }
+
+  // ============ SUBMIT ============
+  function submitGuess() {
+    if (selected.size !== 4) return;
+
+    const guessWords = [...selected];
+    const groupIndices = guessWords.map(w => wordToGroup[w]);
+
+    // Check if all 4 belong to the same group
+    if (groupIndices.every(i => i === groupIndices[0])) {
+      // Correct!
+      const groupIdx = groupIndices[0];
+      const group = groups[groupIdx];
+      solvedGroups.push(group);
+
+      // Remove words from remaining
+      remainingWords = remainingWords.filter(w => !selected.has(w));
+      selected.clear();
+
+      // Render solved group bar
+      const solvedArea = document.getElementById("solved-area");
+      const bar = document.createElement("div");
+      bar.className = "solved-group " + group.color;
+      bar.innerHTML = `<div class="group-title">${group.title}: ${group.subtitle}</div>
+                        <div class="group-words">${group.words.join(", ")}</div>`;
+      solvedArea.appendChild(bar);
+
+      render();
+
+      // Check win
+      if (solvedGroups.length === 4) {
+        setTimeout(() => triggerReveal(), 1200);
+      }
+    } else {
+      // Wrong — check if one away
+      const counts = {};
+      groupIndices.forEach(i => counts[i] = (counts[i] || 0) + 1);
+      const maxInOneGroup = Math.max(...Object.values(counts));
+
+      if (maxInOneGroup === 3) {
+        showToast("One away!");
+      } else {
+        showToast("Not quite...");
+      }
+
+      // Shake selected cards
+      document.querySelectorAll(".card.selected").forEach(c => {
+        c.classList.add("shake");
+        setTimeout(() => c.classList.remove("shake"), 500);
+      });
+    }
+  }
+
+  // ============ TOAST ============
+  function showToast(msg) {
+    const toast = document.getElementById("toast");
+    toast.textContent = msg;
+    toast.classList.add("show");
+    setTimeout(() => toast.classList.remove("show"), 1800);
+  }
+
+  // ============ FINAL REVEAL ============
+  function triggerReveal() {
+    const overlay = document.getElementById("reveal-overlay");
+    const text = document.getElementById("reveal-text");
+    const buttons = document.getElementById("response-buttons");
+
+    overlay.classList.add("active");
+
+    setTimeout(() => {
+      text.textContent = "Will you be my Valentine?";
+      text.classList.add("visible");
+    }, 600);
+
+    setTimeout(() => {
+      buttons.classList.add("visible");
+      initNoButton();
+    }, 1600);
+  }
+
+  // ============ NO BUTTON DODGE ============
+  function initNoButton() {
+    const noBtn = document.getElementById("no-btn");
+
+    noBtn.addEventListener("mouseenter", dodgeNo);
+    noBtn.addEventListener("touchstart", dodgeNo, { passive: true });
+    noBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      dodgeNo();
+    });
+  }
+
+  function dodgeNo() {
+    const noBtn = document.getElementById("no-btn");
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const btnW = noBtn.offsetWidth;
+    const btnH = noBtn.offsetHeight;
+
+    const maxX = vw - btnW - 20;
+    const maxY = vh - btnH - 20;
+
+    const randX = Math.floor(Math.random() * maxX) + 10;
+    const randY = Math.floor(Math.random() * maxY) + 10;
+
+    noBtn.style.position = "fixed";
+    noBtn.style.left = randX + "px";
+    noBtn.style.top = randY + "px";
+    noBtn.style.zIndex = "600";
+    noBtn.style.transition = "none";
+  }
+
+  // ============ YES! ============
+  function sayYes() {
+    document.getElementById("reveal-overlay").style.display = "none";
+    const yippie = document.getElementById("yippie-overlay");
+    yippie.classList.add("active");
+    spawnHearts();
+  }
+
+  function spawnHearts() {
+    const heartEmojis = ["\u2764\uFE0F", "\uD83D\uDC95", "\uD83D\uDC96", "\uD83D\uDC97", "\uD83D\uDC98", "\uD83D\uDC9D", "\uD83E\uDE77", "\u2665\uFE0F"];
+    const container = document.getElementById("yippie-overlay");
+
+    function createHeart() {
+      const heart = document.createElement("div");
+      heart.className = "floating-heart";
+      heart.textContent = heartEmojis[Math.floor(Math.random() * heartEmojis.length)];
+      heart.style.left = Math.random() * 100 + "vw";
+      heart.style.bottom = "-50px";
+      heart.style.fontSize = (Math.random() * 2 + 1.2) + "rem";
+      heart.style.animationDuration = (Math.random() * 3 + 2) + "s";
+      container.appendChild(heart);
+      setTimeout(() => heart.remove(), 5500);
+    }
+
+    // Initial burst
+    for (let i = 0; i < 40; i++) {
+      setTimeout(() => createHeart(), i * 60);
+    }
+
+    // Continuous hearts
+    setInterval(() => createHeart(), 150);
+  }
+
+  // ============ UTILS ============
+  function shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+  }
+
+  // ============ INIT ============
+  render();
+</script>
+
+</body>
+</html>

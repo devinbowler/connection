@@ -1,0 +1,318 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: #fdf2f8;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow-x: hidden;
+}
+
+h1 {
+  font-size: 2rem;
+  color: #be185d;
+  margin-bottom: 0.25rem;
+  letter-spacing: -0.5px;
+}
+
+.subtitle {
+  color: #9d174d;
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
+  opacity: 0.7;
+}
+
+#game-container {
+  width: 100%;
+  max-width: 600px;
+  padding: 0 1rem;
+}
+
+/* Solved groups */
+#solved-area {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.solved-group {
+  border-radius: 12px;
+  padding: 1rem;
+  text-align: center;
+  animation: popIn 0.4s ease;
+}
+
+.solved-group .group-title {
+  font-weight: 700;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.solved-group .group-words {
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+  opacity: 0.85;
+}
+
+.solved-group.purple { background: #c084fc; color: #3b0764; }
+.solved-group.blue   { background: #7dd3fc; color: #0c4a6e; }
+.solved-group.green  { background: #86efac; color: #14532d; }
+.solved-group.yellow { background: #fde047; color: #713f12; }
+
+/* Card grid */
+#card-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.card {
+  background: #fff;
+  border: 2px solid #f9a8d4;
+  border-radius: 12px;
+  padding: 1.1rem 0.5rem;
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #881337;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.15s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(190, 24, 93, 0.15);
+}
+
+.card.selected {
+  background: #be185d;
+  color: #fff;
+  border-color: #be185d;
+  transform: scale(0.96);
+}
+
+.card.shake {
+  animation: shake 0.5s ease;
+}
+
+/* Buttons */
+#controls {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.btn {
+  padding: 0.7rem 2rem;
+  border-radius: 999px;
+  border: 2px solid #be185d;
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.btn-submit {
+  background: #be185d;
+  color: #fff;
+}
+
+.btn-submit:hover { background: #9d174d; border-color: #9d174d; }
+
+.btn-submit:disabled {
+  background: #f9a8d4;
+  border-color: #f9a8d4;
+  cursor: not-allowed;
+}
+
+.btn-deselect {
+  background: transparent;
+  color: #be185d;
+}
+
+.btn-deselect:hover { background: #fce7f3; }
+
+.btn-shuffle {
+  background: transparent;
+  color: #be185d;
+}
+
+.btn-shuffle:hover { background: #fce7f3; }
+
+/* Toast */
+#toast {
+  position: fixed;
+  top: 2rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(-120%);
+  background: #1c1917;
+  color: #fff;
+  padding: 0.75rem 1.5rem;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  z-index: 1000;
+  transition: transform 0.3s ease;
+  white-space: nowrap;
+}
+
+#toast.show {
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Final reveal */
+#reveal-overlay {
+  position: fixed;
+  inset: 0;
+  background: #fdf2f8;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 500;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+
+#reveal-overlay.active {
+  display: flex;
+  opacity: 1;
+}
+
+#reveal-text {
+  font-size: 3rem;
+  font-weight: 900;
+  color: #be185d;
+  text-align: center;
+  line-height: 1.3;
+  opacity: 0;
+  transform: scale(0.8);
+  transition: all 0.6s ease;
+  padding: 0 1rem;
+}
+
+#reveal-text.visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+#response-buttons {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 2rem;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+#response-buttons.visible {
+  opacity: 1;
+}
+
+.btn-yes {
+  background: #be185d;
+  color: #fff;
+  border: none;
+  padding: 1rem 3rem;
+  border-radius: 999px;
+  font-size: 1.3rem;
+  font-weight: 900;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.btn-yes:hover { background: #9d174d; transform: scale(1.05); }
+
+.btn-no {
+  background: #e5e7eb;
+  color: #6b7280;
+  border: none;
+  padding: 1rem 3rem;
+  border-radius: 999px;
+  font-size: 1.3rem;
+  font-weight: 900;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  position: relative;
+}
+
+/* Yippie screen */
+#yippie-overlay {
+  position: fixed;
+  inset: 0;
+  background: #be185d;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 900;
+}
+
+#yippie-overlay.active {
+  display: flex;
+}
+
+#yippie-text {
+  font-size: 4.5rem;
+  font-weight: 900;
+  color: #fff;
+  text-align: center;
+  animation: yippiePulse 0.6s ease infinite alternate;
+  z-index: 910;
+}
+
+/* Floating hearts */
+.floating-heart {
+  position: fixed;
+  font-size: 2rem;
+  z-index: 905;
+  animation: floatUp linear forwards;
+  pointer-events: none;
+}
+
+@keyframes floatUp {
+  0% { opacity: 1; transform: translateY(0) rotate(0deg) scale(1); }
+  100% { opacity: 0; transform: translateY(-110vh) rotate(360deg) scale(0.5); }
+}
+
+@keyframes yippiePulse {
+  from { transform: scale(1) rotate(-2deg); }
+  to   { transform: scale(1.08) rotate(2deg); }
+}
+
+@keyframes popIn {
+  0%   { transform: scale(0.8); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%      { transform: translateX(-6px); }
+  40%      { transform: translateX(6px); }
+  60%      { transform: translateX(-4px); }
+  80%      { transform: translateX(4px); }
+}
+
+/* Mobile tweaks */
+@media (max-width: 480px) {
+  h1 { font-size: 1.5rem; }
+  .card { padding: 0.8rem 0.25rem; font-size: 0.75rem; }
+  #reveal-text { font-size: 2rem; }
+  #yippie-text { font-size: 2.8rem; }
+}
