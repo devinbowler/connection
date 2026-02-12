@@ -204,16 +204,26 @@
 
   function dodgeNo() {
     const noBtn = document.getElementById("no-btn");
+    const yesBtn = document.querySelector(".btn-yes");
     const vw = window.innerWidth;
     const vh = window.innerHeight;
     const btnW = noBtn.offsetWidth;
     const btnH = noBtn.offsetHeight;
 
+    const yesRect = yesBtn.getBoundingClientRect();
+
     const maxX = vw - btnW - 20;
     const maxY = vh - btnH - 20;
 
-    const randX = Math.floor(Math.random() * maxX) + 10;
-    const randY = Math.floor(Math.random() * maxY) + 10;
+    let randX, randY, overlaps;
+    do {
+      randX = Math.floor(Math.random() * maxX) + 10;
+      randY = Math.floor(Math.random() * maxY) + 10;
+      overlaps = randX < yesRect.right + 10 &&
+                 randX + btnW > yesRect.left - 10 &&
+                 randY < yesRect.bottom + 10 &&
+                 randY + btnH > yesRect.top - 10;
+    } while (overlaps);
 
     noBtn.style.position = "fixed";
     noBtn.style.left = randX + "px";
