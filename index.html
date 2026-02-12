@@ -139,9 +139,9 @@
 
       render();
 
-      // Check win
+      // Check win — show Continue button instead of auto-revealing
       if (solvedGroups.length === 4) {
-        setTimeout(() => triggerReveal(), 1200);
+        showContinueButton();
       }
     } else {
       // Wrong — check if one away
@@ -161,6 +161,17 @@
         setTimeout(() => c.classList.remove("shake"), 500);
       });
     }
+  }
+
+  // ============ CONTINUE BUTTON ============
+  function showContinueButton() {
+    const controls = document.getElementById("controls");
+    controls.innerHTML = "";
+    const continueBtn = document.createElement("button");
+    continueBtn.className = "btn btn-continue";
+    continueBtn.textContent = "Continue";
+    continueBtn.addEventListener("click", () => triggerReveal());
+    controls.appendChild(continueBtn);
   }
 
   // ============ TOAST ============

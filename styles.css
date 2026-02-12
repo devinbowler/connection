@@ -154,6 +154,17 @@ h1 {
 
 .btn-shuffle:hover { background: #fce7f3; }
 
+.btn-continue {
+  background: #be185d;
+  color: #fff;
+  width: 100%;
+  padding: 0.9rem 2rem;
+  font-size: 1.1rem;
+  animation: popIn 0.4s ease;
+}
+
+.btn-continue:hover { background: #9d174d; border-color: #9d174d; transform: scale(1.02); }
+
 /* Toast */
 #toast {
   position: fixed;
@@ -314,6 +325,7 @@ h1 {
   h1 { font-size: 1.5rem; }
   .card { padding: 0.8rem 0.25rem; font-size: 0.75rem; }
   .btn { padding: 0.5rem 1.2rem; font-size: 0.7rem; }
+  .btn-continue { padding: 0.7rem 1.5rem; font-size: 0.9rem; }
   #reveal-text { font-size: 2rem; }
   #yippie-text { font-size: 2.8rem; }
 }
